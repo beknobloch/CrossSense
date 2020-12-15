@@ -97,6 +97,8 @@ class CrossSenseApp extends Component {
 
   async setUpBluetooth () {
     
+    console.log("BUTTON");
+
     let PATTERN;
     
     if (Platform.OS === "android") {
