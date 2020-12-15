@@ -125,6 +125,7 @@ class CrossSenseApp extends Component {
 
       if (this.state.bluetoothEnabled) {
 
+        console.log("IF YOU SEE THIS, GOOD");
 
         let targetAddress = "98D351FD797A";
         
@@ -138,6 +139,8 @@ class CrossSenseApp extends Component {
         // Connect to the device
         if (targetDevice != undefined) {
           
+          console.log("IF YOU SEE THIS, VERY GOOD")
+
           connected = targetDevice.connect().then(connectedToDevice, connectToDeviceError);
         
           // Set the final state once completed
@@ -155,7 +158,7 @@ class CrossSenseApp extends Component {
 
     } else {
 
-      let disconnected = this.state.device.disconnect();
+      this.state.device.disconnect();
 
       // State changes handled by listener.
 
@@ -163,6 +166,8 @@ class CrossSenseApp extends Component {
 
     function readIncomingData(data) {
     
+      console.log("VICTORY!!!")
+
       console.log("Receiving data:");
       console.log(data);
 
