@@ -127,6 +127,10 @@ class CrossSenseApp extends Component {
             device: targetDevice,
             deviceConnected: connected
           });
+        } else {
+
+          console.warn("Target device not found.");
+
         }
 
       }
