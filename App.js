@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {StyleSheet, Text, View, Image, Vibration, Platform, TouchableOpacity } from 'react-native';
 
-import RNBluetoothClassic, { BluetoothEventType, BluetoothDevice } from 'react-native-bluetooth-classic';
+import RNBluetoothClassic, { BluetoothEventType, BluetoothDevice, BluetoothErrors } from 'react-native-bluetooth-classic';
 
 // BluetoothButton is a custom module. It takes up the whole screen, and is what the user presses to connect to or disconnect from the CrossSense device.
 const BluetoothButton = (props) => {
@@ -26,42 +26,44 @@ class CrossSenseApp extends Component {
 
     this.state = {
       device: undefined,
-      bluetoothEnabled: true
+      bluetoothEnabled: true,
+      buttonText: "Connect",
     };
   }
 
   async componentDidMount() {
     
-    console.log(`App::componentDidMount adding listeners`)
+    console.log("Adding Bluetooth enable/disable listeners.");
     this.enabledSubscription = RNBluetoothClassic
       .onBluetoothEnabled((event) => this.onStateChanged(event));
     this.disabledSubscription = RNBluetoothClassic
       .onBluetoothDisabled((event) => this.onStateChanged(event));
 
     try {
-      console.log(`App::componentDidMount checking bluetooth status`);
+      console.log("Checking if Bluetooth is enabled.");
       let enabled = await RNBluetoothClassic.isBluetoothEnabled();
 
-      console.log(`App::componentDidMount status => ${enabled}`);
-      this.setState({ bluetoothEnabled: enabled });
+      console.log(`Bluetooth enabled status => ${enabled}`);
+      this.setState({ bluetoothEnabled: enabled, buttonText: "Connected" });
     } catch (error) {
-      console.log(`App::componentDidMount error`, error);
-      this.setState({ bluetoothEnabled: false});
+      console.log(`componentDidMount error`, error);
+      this.setState({ bluetoothEnabled: false, buttonText: "Connect" });
     }
   }
 
   componentWillUnmount() {
-    console.log(`App:componentWillUnmount removing subscriptions`)
-    this.enabledSubscription.remove()
+    console.log("Removing Bluetooth enabled/disable subscriptions.");
+    this.enabledSubscription.remove();
     this.disabledSubscription.remove();
   }
 
   onStateChanged(stateChangedEvent) {
-    console.log(`App::onStateChanged`)
+    console.log("Bluetooth state changed.")
     console.log(stateChangedEvent);
     
     this.setState({
       bluetoothEnabled: stateChangedEvent.enabled,
+      buttonText: stateChangedEvent.enabled ? "Connected" : "Connect",
       device: stateChangedEvent.enabled ? this.state.device : undefined
     });
   }
@@ -88,22 +90,12 @@ class CrossSenseApp extends Component {
       ]
     }
 
-    let enabled = false;
-
-    try {
-
-      enabled = await RNBluetoothClassic.isBluetoothEnabled();
-
-    } catch (error) {
-        console.log("Failed to check if Bluetooth is enabled.");
-        console.log(error);
-    }
-
-    if(enabled) {
+    if(this.state.bluetoothEnabled) {
 
       let address = "98D351FD797A";
-      let device = RNBluetoothClassic.getConnectedDevice(address);
+      let device = await RNBluetoothClassic.getConnectedDevice(address);
       device.then(connectToDevice, connectToDeviceError);
+    
     }
 
 
@@ -112,6 +104,7 @@ class CrossSenseApp extends Component {
       console.log("Receiving data:");
       console.log(data);
 
+      // Vibrate regardless of the data received (CHANGE)
       Vibration.vibrate(PATTERN);
     
     }
@@ -137,9 +130,9 @@ class CrossSenseApp extends Component {
         
         if (!connection) {
 
-          console.log("State says no connection. Attempting to connect.");
+          console.log("No connection. Attempting to connect.");
     
-          connection = device.connect().then( (connectionResult) => {
+          device.connect().then( (connectionResult) => {
           
             if (connectionResult) {
               
@@ -162,7 +155,7 @@ class CrossSenseApp extends Component {
         }
         else {
 
-          console.log("State says connection. Attempting to disconnect.");
+          console.log("Connection. Attempting to disconnect.");
     
           readSubscription.remove();
           
