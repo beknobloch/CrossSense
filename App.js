@@ -23,6 +23,47 @@ class CrossSenseApp extends Component {
   
   constructor () {
     super();
+
+    this.state = {
+      device: undefined,
+      bluetoothEnabled: true
+    };
+  }
+
+  async componentDidMount() {
+    
+    console.log(`App::componentDidMount adding listeners`)
+    this.enabledSubscription = RNBluetoothClassic
+      .onBluetoothEnabled((event) => this.onStateChanged(event));
+    this.disabledSubscription = RNBluetoothClassic
+      .onBluetoothDisabled((event) => this.onStateChanged(event));
+
+    try {
+      console.log(`App::componentDidMount checking bluetooth status`);
+      let enabled = await RNBluetoothClassic.isBluetoothEnabled();
+
+      console.log(`App::componentDidMount status => ${enabled}`);
+      this.setState({ bluetoothEnabled: enabled });
+    } catch (error) {
+      console.log(`App::componentDidMount error`, error);
+      this.setState({ bluetoothEnabled: false});
+    }
+  }
+
+  componentWillUnmount() {
+    console.log(`App:componentWillUnmount removing subscriptions`)
+    this.enabledSubscription.remove()
+    this.disabledSubscription.remove();
+  }
+
+  onStateChanged(stateChangedEvent) {
+    console.log(`App::onStateChanged`)
+    console.log(stateChangedEvent);
+    
+    this.setState({
+      bluetoothEnabled: stateChangedEvent.enabled,
+      device: stateChangedEvent.enabled ? this.state.device : undefined
+    });
   }
 
   async setUpBluetooth () {
