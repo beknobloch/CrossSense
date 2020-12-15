@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {StyleSheet, Text, View, Image, Vibration, Platform, TouchableOpacity } from 'react-native';
 
 import RNBluetoothClassic, { BluetoothEventType, BluetoothDevice, BluetoothErrors } from 'react-native-bluetooth-classic';
+import { sub } from 'react-native-reanimated';
 
 // BluetoothButton is a custom module. It takes up the whole screen, and is what the user presses to connect to or disconnect from the CrossSense device.
 const BluetoothButton = (props) => {
@@ -57,9 +58,22 @@ class CrossSenseApp extends Component {
 
   componentWillUnmount() {
     console.log("Removing Bluetooth enabled/disable subscriptions.");
-    this.enabledSubscription.remove();
-    this.disabledSubscription.remove();
-    this.disconnectedSubscription.remove();
+    
+    let subscriptions = [
+      this.enabledSubscription,
+      this.disabledSubscription,
+      this.disconnectedSubscription
+    ]
+
+    subscriptions.forEach( (subscription) => {
+      try {
+        subscription.remove();
+      } catch (error) {
+        console.warn("Failed to remove", subscription);
+        console.log(error);
+      }
+    })
+    
   }
 
   onStateChanged(stateChangedEvent) {
