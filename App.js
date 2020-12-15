@@ -116,7 +116,7 @@ class CrossSenseApp extends Component {
         // Filter for your address / class
         const targetDevice = bonded.find( (device) => device.address == targetAddress);
 
-        const connected = false;
+        let connected = false;
         // Connect to the device
         if (targetDevice != undefined) {
           
