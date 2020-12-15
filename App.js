@@ -46,7 +46,7 @@ class CrossSenseApp extends Component {
 
     try {
       console.log("Checking if Bluetooth is enabled.");
-      let enabled = await RNBluetoothClassic.isBluetoothEnabled();
+      let enabled = RNBluetoothClassic.isBluetoothEnabled();
 
       console.log(`Bluetooth enabled status => ${enabled}`);
       this.setState({ bluetoothEnabled: enabled});
