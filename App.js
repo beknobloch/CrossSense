@@ -33,7 +33,7 @@ class CrossSenseApp extends Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     
     console.log("Adding Bluetooth enable/disable listeners.");
     this.enabledSubscription = RNBluetoothClassic
@@ -46,7 +46,7 @@ class CrossSenseApp extends Component {
 
     try {
       console.log("Checking if Bluetooth is enabled.");
-      let enabled = RNBluetoothClassic.isBluetoothEnabled();
+      let enabled = await RNBluetoothClassic.isBluetoothEnabled();
 
       console.log(`Bluetooth enabled status => ${enabled}`);
       this.setState({ bluetoothEnabled: enabled});
@@ -56,6 +56,7 @@ class CrossSenseApp extends Component {
     }
   }
 
+  /*
   componentWillUnmount() {
     console.log("Removing Bluetooth enabled/disable listeners.");
     
@@ -75,6 +76,7 @@ class CrossSenseApp extends Component {
     })
     
   }
+  */
 
   onStateChanged(stateChangedEvent) {
     console.log("Bluetooth state changed.")
