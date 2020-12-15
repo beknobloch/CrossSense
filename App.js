@@ -33,7 +33,7 @@ class CrossSenseApp extends Component {
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     
     console.log("Adding Bluetooth enable/disable listeners.");
     this.enabledSubscription = RNBluetoothClassic
@@ -57,7 +57,7 @@ class CrossSenseApp extends Component {
   }
 
   componentWillUnmount() {
-    console.log("Removing Bluetooth enabled/disable subscriptions.");
+    console.log("Removing Bluetooth enabled/disable listeners.");
     
     let subscriptions = [
       this.enabledSubscription,
