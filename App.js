@@ -129,7 +129,11 @@ class CrossSenseApp extends Component {
 
     if (!this.state.deviceConnected) {
 
+      console.log("No device connected.");
+
       if (this.state.bluetoothEnabled) {
+
+        console.log("Bluetooth is enabled. Proceeding with connection.");
 
         console.log("IF YOU SEE THIS, GOOD");
 
@@ -167,6 +171,8 @@ class CrossSenseApp extends Component {
       }
 
     } else {
+
+      console.log("Device connected already. Disconnecting.");
 
       this.state.device.disconnect();
 
