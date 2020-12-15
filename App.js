@@ -37,7 +37,11 @@ class CrossSenseApp extends Component {
     
     console.log("Adding Bluetooth enable/disable listeners.");
     this.enabledSubscription = RNBluetoothClassic
-      .onBluetoothEnabled((event) => this.onStateChanged(event));
+      .onBluetoothEnabled((event) => {
+        console.log("testA");
+        this.onStateChanged(event);
+        console.log("testB");
+      });
     console.log("test1");
       this.disabledSubscription = RNBluetoothClassic
       .onBluetoothDisabled((event) => this.onStateChanged(event));
