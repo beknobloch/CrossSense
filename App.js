@@ -27,6 +27,7 @@ class CrossSenseApp extends Component {
     this.state = {
       device: undefined,
       bluetoothEnabled: true,
+      deviceConnected: false,
       buttonText: "Connect",
     };
   }
@@ -39,15 +40,18 @@ class CrossSenseApp extends Component {
     this.disabledSubscription = RNBluetoothClassic
       .onBluetoothDisabled((event) => this.onStateChanged(event));
 
+    this.disconnectedSubscription = RNBluetoothClassic
+      .onDeviceDisconnected((event) => this.onDeviceDisconnected(event));
+
     try {
       console.log("Checking if Bluetooth is enabled.");
       let enabled = await RNBluetoothClassic.isBluetoothEnabled();
 
       console.log(`Bluetooth enabled status => ${enabled}`);
-      this.setState({ bluetoothEnabled: enabled, buttonText: "Connected" });
+      this.setState({ bluetoothEnabled: enabled});
     } catch (error) {
       console.log(`componentDidMount error`, error);
-      this.setState({ bluetoothEnabled: false, buttonText: "Connect" });
+      this.setState({ bluetoothEnabled: false});
     }
   }
 
@@ -55,6 +59,7 @@ class CrossSenseApp extends Component {
     console.log("Removing Bluetooth enabled/disable subscriptions.");
     this.enabledSubscription.remove();
     this.disabledSubscription.remove();
+    this.disconnectedSubscription.remove();
   }
 
   onStateChanged(stateChangedEvent) {
@@ -63,9 +68,17 @@ class CrossSenseApp extends Component {
     
     this.setState({
       bluetoothEnabled: stateChangedEvent.enabled,
-      buttonText: stateChangedEvent.enabled ? "Connected" : "Connect",
       device: stateChangedEvent.enabled ? this.state.device : undefined
     });
+  }
+
+  onDeviceDisconnected(disconnectedEvent) {
+    console.log("Device disconnected.");
+    console.log(disconnectedEvent);
+
+    this.readSubscription.remove();
+
+    this.setState( { device: undefined, deviceConnected: false, buttonText: "Connect" } )
   }
 
   async setUpBluetooth () {
@@ -90,14 +103,41 @@ class CrossSenseApp extends Component {
       ]
     }
 
-    if(this.state.bluetoothEnabled) {
+    if (!this.state.deviceConnected) {
 
-      let address = "98D351FD797A";
-      let device = await RNBluetoothClassic.getConnectedDevice(address);
-      device.then(connectToDevice, connectToDeviceError);
-    
+      if (this.state.bluetoothEnabled) {
+
+
+        let targetAddress = "98D351FD797A";
+        
+        // Get the list of bonded devices
+        const bonded = RNBluetoothClassic.getBondedDevices();
+
+        // Filter for your address / class
+        const targetDevice = bonded.find( (device) => device.address == targetAddress);
+
+        const connected = false;
+        // Connect to the device
+        if (targetDevice != undefined) {
+          
+          connected = targetDevice.connect().then(connectedToDevice, connectToDeviceError);
+        
+          // Set the final state once completed
+          this.setState({
+            device: targetDevice,
+            deviceConnected: connected
+          });
+        }
+
+      }
+
+    } else {
+
+      let disconnected = this.state.device.disconnect();
+
+      // State changes handled by listener.
+
     }
-
 
     function readIncomingData(data) {
     
@@ -108,81 +148,13 @@ class CrossSenseApp extends Component {
       Vibration.vibrate(PATTERN);
     
     }
-    
-    async function connectToDevice(device) {
-    
-      let connection;
-      let readSubscription;
-    
-      try {
-        
-        try{
-          
-          Vibration.cancel();
 
-        }catch(error){
+    function connectedToDevice (device) {
 
-          console.log("No vibration to cancel.");
+      this.readSubscription = device.onDataReceived((data) => readIncomingData(data));
 
-        }
+      this.setState({ buttonText: "Disconnect" })
 
-        connection = await device.isConnected();
-        
-        if (!connection) {
-
-          console.log("No connection. Attempting to connect.");
-    
-          device.connect().then( (connectionResult) => {
-          
-            if (connectionResult) {
-              
-              console.log("Successful connection to device.");
-              
-              readSubscription = device.onDataReceived((data) => readIncomingData(data));
-
-              Vibration.vibrate(1000);
-            }
-            else {
-
-              console.log("Connection to device failed.");
-              
-              Vibration.vibrate(3000);
-
-            }
-          }
-          );
-    
-        }
-        else {
-
-          console.log("Connection. Attempting to disconnect.");
-    
-          readSubscription.remove();
-          
-          try {
-            device.disconnect().then( (disconnectedResult) => {
-            
-              if(disconnectedResult) {
-                
-                console.log("Successful disconnection from device.");
-                
-                Vibration.vibrate(1000);
-              } else {
-                console.log("Disconnection from device failed.");
-              }
-
-            }
-            )
-          } catch(error) {
-            console.log("Error disconnecting device.");
-            console.log(error);
-          }
-        }
-    
-      } catch (error) {
-        console.log("Error connecting to device.");
-        console.log(error);
-      }
     }
 
     function connectToDeviceError (error) {
