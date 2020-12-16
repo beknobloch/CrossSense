@@ -6,7 +6,6 @@ import React, {Component} from 'react';
 import {StyleSheet, Text, View, Image, Vibration, Platform, TouchableOpacity } from 'react-native';
 
 import RNBluetoothClassic, { BluetoothEventType, BluetoothDevice, BluetoothErrors } from 'react-native-bluetooth-classic';
-import { sub } from 'react-native-reanimated';
 
 // BluetoothButton is a custom module. It takes up the whole screen, and is what the user presses to connect to or disconnect from the CrossSense device.
 const BluetoothButton = (props) => {
