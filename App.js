@@ -1,3 +1,7 @@
+// CrossSense companion app
+// Created by Ben Knobloch, Reed Snedeker, Brendan Taylor
+// react-native-bluetooth-classic created by Ken Davidson - some code written with the help of Ken Davidson
+
 import React, {Component} from 'react';
 import {StyleSheet, Text, View, Image, Vibration, Platform, TouchableOpacity } from 'react-native';
 
