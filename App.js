@@ -110,6 +110,17 @@ class CrossSenseApp extends Component {
     this.setState( { device: undefined, deviceConnected: false, buttonText: "Connect" } )
   }
 
+  /**
+   * Toggles device connection.  If the device is currently connected, it will be disconnected; if the device is
+   * not currently connected the follwing things are done:
+   * - Check to see if Bluetooth is enabled (note - this shouldn't be required as you should be listening for 
+   * state changes, and if the state is disabled, you can't even get this far)
+   * - Attempt to get the bonded devices 
+   * - Filter the bonded devices for the expected device
+   * - Attempt connection to the device
+   * 
+   * Remember that all calls to RNBluetoothClassic or BluetoothDevice require try/catch and await wrapping.
+   */
   async setUpBluetooth () {
     
     console.log("BUTTON");
@@ -145,11 +156,19 @@ class CrossSenseApp extends Component {
         console.log("IF YOU SEE THIS, GOOD");
 
         let targetAddress = "98D351FD797A";
+        let bonded;
         
-        // Get the list of bonded devices
-        const bonded = RNBluetoothClassic.getBondedDevices();
+        // You need to wrap each of these calls in try/catch
+        try {
+          // You need to use await for all the calls so they return promises
+          bonded = await RNBluetoothClassic.getBondedDevices();
+        } catch(err) {
+          console.error(err);
+          return;
+        }
 
-        // Filter for your address / class
+        // Filter for your address / clas
+        console.log(`Found ${bonded.length}`, bonded)
         const targetDevice = bonded.find( (device) => device.address == targetAddress);
 
         let connected = false;
@@ -218,7 +237,7 @@ class CrossSenseApp extends Component {
   render () {
     return (
       <View style={styles.container}>
-        <BluetoothButton onPress={this.setUpBluetooth} text={"Connect"}/>
+        <BluetoothButton onPress={() => this.setUpBluetooth()} text={"Connect"}/>
       </View>
     );
   }
