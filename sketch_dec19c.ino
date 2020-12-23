@@ -17,14 +17,14 @@ void loop(){
     if (pirState == LOW) {
       // we have just turned on
       Serial.println("Motion detected!");
-      // We only want to print on the output change, not state
+      analogWrite(A0, 150);
       pirState = HIGH;
     }
   } else {
     if (pirState == HIGH){
       // we have just turned of
       Serial.println("Motion ended!");
-      // We only want to print on the output change, not state
+      analogWrite(A0, 0);
       pirState = LOW;
     }
   }
